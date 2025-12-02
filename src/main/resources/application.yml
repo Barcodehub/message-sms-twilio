@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: sms-service
+  profiles:
+    active: ${SPRING_PROFILE:dev}
+
+# Configuración de Twilio
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID}
+  auth-token: ${TWILIO_AUTH_TOKEN}
+  phone-number: ${TWILIO_PHONE_NUMBER}
+
+# Información de la aplicación
+app:
+  name: "SMS Notification Service"
+  description: "Microservicio de mensajería SMS usando Twilio - Pragma PowerUp"
+  version: "1.0.0"
+
+# Configuración de SpringDoc OpenAPI
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    enabled: true
+    path: /api-docs
+

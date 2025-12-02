@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: SMS Notification Service API
+  description: Microservicio para envío de mensajes SMS usando Twilio
+  version: 1.0.0
+  contact:
+    name: Pragma PowerUp Team
+
+servers:
+  - url: http://localhost:8082
+    description: Servidor local de desarrollo
+
+paths:
+  /sms/send:
+    post:
+      tags:
+        - SMS
+      summary: Enviar mensaje SMS
+      description: Envía un mensaje SMS a un número de teléfono específico usando Twilio
+      operationId: sendSms
+      requestBody:
+        description: Datos del mensaje SMS a enviar
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmsRequest'
+      responses:
+        '200':
+          description: SMS enviado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmsDataResponse'
+        '400':
+          description: Error de validación en los datos enviados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error al enviar el SMS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # Request para enviar SMS
+    SmsRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: Número de teléfono destino en formato internacional (E.164)
+          pattern: '^\+[1-9]\d{1,14}$'
+          example: "+573001234567"
+        message:
+          type: string
+          description: Contenido del mensaje SMS
+          minLength: 1
+          maxLength: 1600
+          example: "Su pedido está listo para ser recogido"
+        metadata:
+          type: object
+          description: Metadatos opcionales sobre el mensaje
+          additionalProperties:
+            type: string
+          example:
+            orderId: "12345"
+            restaurantName: "Restaurante Ejemplo"
+      required:
+        - phoneNumber
+        - message
+
+    # Response wrapper para SMS enviado
+    SmsDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/SmsResponse'
+      required:
+        - data
+
+    # Response para SMS enviado
+    SmsResponse:
+      type: object
+      properties:
+        sid:
+          type: string
+          description: ID único del mensaje en Twilio
+          example: "SM1234567890abcdef1234567890abcdef"
+        status:
+          type: string
+          description: Estado del mensaje
+          enum: [queued, sending, sent, failed, delivered, undelivered]
+          example: "queued"
+        phoneNumber:
+          type: string
+          description: Número de teléfono destino
+          example: "+573001234567"
+        sentAt:
+          type: string
+          format: date-time
+          description: Fecha y hora de envío
+          example: "2024-12-01T10:30:00Z"
+        message:
+          type: string
+          description: Mensaje enviado
+          example: "Su pedido está listo para ser recogido"
+
+    # Response de error
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp del error
+          example: "2024-12-01T10:30:00Z"
+        status:
+          type: integer
+          description: Código de estado HTTP
+          example: 400
+        error:
+          type: string
+          description: Tipo de error
+          example: "Bad Request"
+        message:
+          type: string
+          description: Mensaje descriptivo del error
+          example: "El número de teléfono no es válido"
+        path:
+          type: string
+          description: Path de la petición que causó el error
+          example: "/sms/send"
