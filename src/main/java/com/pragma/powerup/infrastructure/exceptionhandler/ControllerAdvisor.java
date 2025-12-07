@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Manejador global de excepciones para el microservicio de SMS
- */
 @ControllerAdvice
 public class ControllerAdvisor {
 
@@ -28,9 +25,7 @@ public class ControllerAdvisor {
     private static final String ERROR = "error";
     private static final String PATH = "path";
 
-    /**
-     * Maneja excepciones de datos no encontrados
-     */
+
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNoDataFoundException(
             NoDataFoundException exception, WebRequest request) {
@@ -44,9 +39,7 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    /**
-     * Maneja excepciones de número de teléfono inválido
-     */
+
     @ExceptionHandler(InvalidPhoneNumberException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidPhoneNumberException(
             InvalidPhoneNumberException exception, WebRequest request) {
@@ -60,9 +53,7 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    /**
-     * Maneja excepciones de fallo en entrega de SMS
-     */
+
     @ExceptionHandler(SmsDeliveryException.class)
     public ResponseEntity<Map<String, Object>> handleSmsDeliveryException(
             SmsDeliveryException exception, WebRequest request) {
@@ -76,9 +67,7 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    /**
-     * Maneja excepciones genéricas de SMS
-     */
+
     @ExceptionHandler(SmsException.class)
     public ResponseEntity<Map<String, Object>> handleSmsException(
             SmsException exception, WebRequest request) {
@@ -92,14 +81,12 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    /**
-     * Maneja errores de validación de entrada
-     */
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(
             MethodArgumentNotValidException exception, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getAllErrors().forEach((error) -> {
+        exception.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
@@ -116,9 +103,7 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    /**
-     * Maneja IllegalArgumentException
-     */
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
             IllegalArgumentException exception, WebRequest request) {
@@ -132,9 +117,7 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    /**
-     * Maneja cualquier otra excepción no controlada
-     */
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGlobalException(
             Exception exception, WebRequest request) {

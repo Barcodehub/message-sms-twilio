@@ -4,7 +4,6 @@ import com.pragma.powerup.apifirst.model.SmsDataResponseDto;
 import com.pragma.powerup.apifirst.model.SmsResponseDto;
 import com.pragma.powerup.domain.model.SmsModel;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import java.time.LocalDateTime;

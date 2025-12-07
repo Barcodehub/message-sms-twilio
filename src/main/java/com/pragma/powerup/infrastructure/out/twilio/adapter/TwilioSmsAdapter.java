@@ -53,7 +53,6 @@ public class TwilioSmsAdapter implements ISmsPersistencePort {
             return mapToSmsModel(twilioMessage, phoneNumber, message, metadata);
 
         } catch (Exception e) {
-            logger.error("Error al enviar SMS a {}: {}", phoneNumber, e.getMessage(), e);
             throw new SmsDeliveryException("Error al enviar el SMS: " + e.getMessage(), e);
         }
     }
