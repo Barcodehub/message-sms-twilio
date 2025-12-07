@@ -1,119 +1,79 @@
-# 📱 SMS Notification Service
+<br />
+<div align="center">
+<h3 align="center">PRAGMA POWER-UP - SMS NOTIFICATION SERVICE</h3>
+  <p align="center">
+    Microservicio de mensajería SMS usando Twilio para el sistema de plazoleta de comidas. Notifica a los clientes cuando sus pedidos están listos para recoger.
+  </p>
+</div>
 
-Microservicio de mensajería SMS usando Twilio para el proyecto Food Court - Pragma PowerUp.
+### Built With
 
-## 🎯 Descripción
+* ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white)
+* ![Spring](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+* ![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=for-the-badge&logo=Twilio&logoColor=white)
+* ![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
 
-Este microservicio proporciona funcionalidad de envío de mensajes SMS a través de Twilio. Está diseñado para ser llamado desde otros microservicios del sistema Food Court para notificar a los usuarios sobre el estado de sus pedidos u otras comunicaciones importantes.
+## Descripción General
 
-## 🏗️ Arquitectura
+Este microservicio proporciona funcionalidad de envío de mensajes SMS a través de Twilio. Está diseñado para ser llamado desde el microservicio `foodcourt` para notificar a los usuarios sobre el estado de sus pedidos.
+
+**Responsabilidades:**
+- **Envío de SMS**: Integración con API de Twilio para enviar mensajes de texto
+- **Notificaciones de pedidos**: Envía PIN de seguridad cuando un pedido está listo para recoger
+- **Validación de números**: Verifica formato de números telefónicos (E.164)
+- **Manejo de errores**: Gestiona errores de conectividad y entrega de SMS
+
+**Puerto:** 8084  
+**Base de datos:** No requiere (stateless)  
+**Arquitectura:** Hexagonal (Puertos y Adaptadores)
+
+### Arquitectura
 
 El proyecto sigue los principios de **Arquitectura Hexagonal (Puertos y Adaptadores)**:
 
-- **Domain**: Lógica de negocio pura y reglas de validación
-- **Application**: Casos de uso y orquestación
-- **Infrastructure**: Adaptadores para comunicación externa (Twilio, REST API)
-
-### Estructura del Proyecto
-
 ```
-src/main/java/com/pragma/powerup/
-├── domain/
-│   ├── api/              # Puertos de entrada (interfaces de servicios)
-│   ├── spi/              # Puertos de salida (interfaces de persistencia)
-│   ├── model/            # Modelos de dominio
-│   ├── usecase/          # Casos de uso
-│   └── exception/        # Excepciones de dominio
-├── application/
-│   ├── handler/          # Manejadores de aplicación
-│   └── mapper/           # Mapeadores entre capas
-└── infrastructure/
-    ├── configuration/    # Configuración de Spring
-    ├── input/rest/       # Controladores REST
-    ├── out/twilio/       # Adaptador de Twilio
-    └── exceptionhandler/ # Manejo global de excepciones
+src/
+├── domain/              # Lógica de negocio pura
+│   ├── model/          # Modelos de dominio
+│   ├── usecase/        # Casos de uso
+│   ├── api/            # Puertos de entrada
+│   ├── spi/            # Puertos de salida
+│   └── exception/      # Excepciones de dominio
+├── application/         # Capa de aplicación
+│   ├── handler/        # Handlers
+│   └── mapper/         # Mappers (MapStruct)
+└── infrastructure/      # Adaptadores
+    ├── input/rest/     # Controladores REST
+    ├── out/twilio/     # Adaptador de Twilio
+    └── configuration/  # Configuración de Spring
 ```
+---
 
-## 🚀 Tecnologías
+## Endpoints Implementados
 
-- **Java 17**
-- **Spring Boot 3.2.0**
-- **Twilio SDK 10.0.0**
-- **MapStruct** - Mapeo de objetos
-- **Lombok** - Reducción de código boilerplate
-- **SpringDoc OpenAPI** - Documentación de API
-- **Gradle** - Gestión de dependencias
+### `POST /sms/send`
 
-## 📋 Prerequisitos
+Envía un mensaje SMS a un número de teléfono específico.
 
-- JDK 17 o superior
-- Cuenta de Twilio (con Account SID, Auth Token y número de teléfono)
-- Gradle 7.x o superior
-
-## ⚠️ Seguridad y Protección de Secretos
-
-**No incluyas valores sensibles (como Account SID, Auth Token o Phone Number de Twilio) directamente en archivos de configuración como `application.yml`.** Usa siempre variables de entorno y verifica que no se suban secretos al repositorio. GitHub puede bloquear tus pushes si detecta secretos expuestos.
-
-## ⚙️ Configuración
-
-### Variables de Entorno
-
-Configura las siguientes variables de entorno en tu sistema o en el entorno de despliegue:
-
-```bash
-# Configuración de Twilio
-TWILIO_ACCOUNT_SID=tu_account_sid
-TWILIO_AUTH_TOKEN=tu_auth_token
-TWILIO_PHONE_NUMBER=tu_numero_twilio
-
-# Configuración del servidor
-SERVER_PORT=8081
-SPRING_PROFILE=dev
-```
-
-### Archivos de Configuración
-
-- `application.yml` - No debe contener valores sensibles, solo referencias a variables de entorno.
-- `application-dev.yml` - Configuración de desarrollo
-- `application-prod.yml` - Configuración de producción
-
-## 🔧 Instalación y Ejecución
-
-### Compilar el proyecto
-
-```bash
-./gradlew clean build
-```
-
-### Ejecutar en modo desarrollo
-
-```bash
-./gradlew bootRun
-```
-
-### Ejecutar con perfil específico
-
-```bash
-./gradlew bootRun --args='--spring.profiles.active=dev'
-```
-
-## 📡 API Endpoints
-
-### Enviar SMS
-
-**POST** `/sms/send`
+> **Nota:** Este endpoint es llamado internamente por el microservicio `foodcourt` cuando un pedido está listo.
 
 **Request Body:**
 ```json
 {
   "phoneNumber": "+573001234567",
-  "message": "Su pedido está listo para ser recogido",
+  "message": "Su pedido #123 está listo para recoger. PIN de seguridad: 4567",
   "metadata": {
-    "orderId": "12345",
-    "restaurantName": "Restaurante Ejemplo"
+    "orderId": "123",
+    "restaurantName": "Restaurante Ejemplo",
+    "securityPin": "4567"
   }
 }
 ```
+
+**Validaciones:**
+- ✅ `phoneNumber` es obligatorio y debe estar en formato E.164 (ejemplo: +573001234567)
+- ✅ `message` es obligatorio y debe tener máximo 1600 caracteres
+- ✅ `metadata` es opcional (información adicional para tracking)
 
 **Response (200 OK):**
 ```json
@@ -122,83 +82,118 @@ SPRING_PROFILE=dev
     "sid": "SM1234567890abcdef1234567890abcdef",
     "status": "queued",
     "phoneNumber": "+573001234567",
-    "sentAt": "2024-12-01T10:30:00Z",
-    "message": "Su pedido está listo para ser recogido"
+    "sentAt": "2025-12-07T10:30:00Z",
+    "message": "Su pedido #123 está listo para recoger. PIN de seguridad: 4567"
   }
 }
 ```
 
-## 📚 Documentación API
+**Posibles valores de status:**
+- `queued`: El mensaje está en cola para ser enviado
+- `sent`: El mensaje ha sido enviado
+- `delivered`: El mensaje fue entregado exitosamente
+- `failed`: El envío falló
 
-La documentación interactiva de la API está disponible en:
+**Errores:**
+- `400 Bad Request`: Número de teléfono inválido o mensaje muy largo
+- `500 Internal Server Error`: Error en la API de Twilio
 
-- **Swagger UI**: `http://localhost:8081/swagger-ui.html`
-- **OpenAPI Spec**: `http://localhost:8081/api-docs`
+---
 
-## 🧪 Testing
+## Cómo Ejecutar Localmente
+
+### 1. Prerequisitos
+
+- ✅ JDK 17
+- ✅ Gradle
+- ✅ **Cuenta de Twilio** (con Account SID, Auth Token y número de teléfono)
+
+### 2. Crear Cuenta de Twilio
+
+1. **Registrarse en Twilio**
+   - Ir a [https://www.twilio.com/try-twilio](https://www.twilio.com/try-twilio)
+   - Crear una cuenta gratuita (incluye créditos de prueba)
+
+2. **Obtener credenciales**
+   - Una vez dentro del dashboard, ir a "Account Info"
+   - Copiar:
+     - `Account SID`
+     - `Auth Token`
+
+3. **Obtener un número de teléfono**
+   - En el dashboard, ir a "Phone Numbers" → "Manage" → "Buy a number"
+   - Seleccionar un número con capacidad SMS
+   - Para pruebas, Twilio proporciona un número gratuito
+
+4. **Verificar números de destino (cuenta de prueba)**
+   - Si usas una cuenta de prueba, debes verificar los números a los que enviarás SMS
+   - Ir a "Phone Numbers" → "Manage" → "Verified Caller IDs"
+   - Agregar y verificar tu número de teléfono
+
+### 3. Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone <repository-url>
+   cd message-sms
+   ```
+
+2. **Configurar variables de entorno**
+
+   ```powershell
+   $env:TWILIO_ACCOUNT_SID="tu_account_sid_aqui"
+   $env:TWILIO_AUTH_TOKEN="tu_auth_token_aqui"
+   $env:TWILIO_PHONE_NUMBER="+1234567890"
+   ```
+
+3. **Verificar configuración**
+   
+   Editar `src/main/resources/application-dev.yml`:
+   ```yaml
+   twilio:
+     account-sid: ${TWILIO_ACCOUNT_SID}
+     auth-token: ${TWILIO_AUTH_TOKEN}
+     phone-number: ${TWILIO_PHONE_NUMBER}
+   ```
+
+### 4. Compilar el Proyecto
 
 ```bash
-# Ejecutar todos los tests
-./gradlew test
-
-# Ejecutar tests con reporte de cobertura
-./gradlew test jacocoTestReport
+./gradlew clean build
 ```
 
-## 🔒 Validaciones
+### 5. Ejecutar la Aplicación
 
-El servicio incluye validaciones para:
-
-- ✅ Formato de número de teléfono (E.164)
-- ✅ Longitud del mensaje (máx. 1600 caracteres)
-- ✅ Campos requeridos
-
-## 🐛 Manejo de Errores
-
-El servicio maneja las siguientes excepciones:
-
-- `InvalidPhoneNumberException` - Número de teléfono inválido
-- `SmsDeliveryException` - Error al enviar el SMS
-- `SmsException` - Error genérico de SMS
-- `NoDataFoundException` - Datos no encontrados
-
-## 📝 Logs
-
-Los logs se configuran según el perfil activo:
-
-- **Desarrollo**: Nivel DEBUG para el paquete `com.pragma.powerup`
-- **Producción**: Nivel INFO para el paquete `com.pragma.powerup`
-
-## 🤝 Integración con otros Microservicios
-
-Este microservicio está diseñado para ser consumido por otros servicios del ecosistema Food Court. Para integrarlo:
-
-1. Realiza una petición HTTP POST a `/sms/send`
-2. Incluye las credenciales necesarias (si aplica)
-3. Proporciona el número de teléfono en formato E.164
-4. Incluye el mensaje y metadatos opcionales
-
-### Ejemplo de integración (Java)
-
-```java
-RestTemplate restTemplate = new RestTemplate();
-SmsRequest request = new SmsRequest(
-    "+573001234567",
-    "Su pedido #123 está listo",
-    Map.of("orderId", "123")
-);
-
-ResponseEntity<SmsDataResponse> response = restTemplate.postForEntity(
-    "http://localhost:8081/sms/send",
-    request,
-    SmsDataResponse.class
-);
+**Opción 1: Desde terminal**
+```bash
+./gradlew bootRun
 ```
 
-## 📞 Contacto
+**Opción 2: Desde IntelliJ IDEA**
+- Configurar las variables de entorno en la configuración de ejecución
+- Right-click `PowerUpApplication.java` → Run
 
-Pragma PowerUp Team
+### 6. Probar envío de SMS
 
-## 📄 Licencia
+**Usando Postman:**
+1. Crear una petición POST a `http://localhost:8084/sms/send`
+2. En Body (raw JSON), pegar el JSON de ejemplo
+3. Cambiar el `phoneNumber` por tu número verificado
+4. Enviar y verificar que recibes el SMS
 
-Este proyecto es parte del programa Pragma PowerUp.
+---
+
+## Integración con otros Microservicios
+
+Este microservicio está diseñado para ser consumido por el microservicio [`foodcourt`](https://github.com/Barcodehub/foodcourt).
+
+---
+
+## Autor
+
+**Brayan Barco**
+
+## Licencia
+
+Este proyecto es parte de la prueba técnica para Pragma.
+
