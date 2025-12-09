@@ -38,9 +38,6 @@ public class TwilioSmsAdapter implements ISmsPersistencePort {
     @Override
     public SmsModel sendSms(String phoneNumber, String message, Map<String, String> metadata) {
         try {
-            logger.info("Enviando SMS a: {} con mensaje: {}", phoneNumber, message);
-
-            // Crear y enviar el mensaje usando Twilio
             Message twilioMessage = Message.creator(
                     new PhoneNumber(phoneNumber),
                     new PhoneNumber(twilioProperties.getPhoneNumber()),
@@ -57,7 +54,6 @@ public class TwilioSmsAdapter implements ISmsPersistencePort {
         }
     }
 
-
     private SmsModel mapToSmsModel(Message twilioMessage, String phoneNumber, String message, Map<String, String> metadata) {
         SmsModel smsModel = new SmsModel();
         smsModel.setSid(twilioMessage.getSid());
@@ -65,7 +61,6 @@ public class TwilioSmsAdapter implements ISmsPersistencePort {
         smsModel.setMessage(message);
         smsModel.setStatus(twilioMessage.getStatus().toString().toUpperCase());
 
-        // Convertir la fecha de Twilio a LocalDateTime
         if (twilioMessage.getDateCreated() != null) {
             smsModel.setSentAt(LocalDateTime.ofInstant(
                     twilioMessage.getDateCreated().toInstant(),
