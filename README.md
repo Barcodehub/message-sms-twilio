@@ -159,7 +159,12 @@ Envía un mensaje SMS a un número de teléfono específico.
 ### 4. Compilar el Proyecto
 
 ```bash
+# Generar DTOs desde OpenAPI spec
+./gradlew openApiGenerate
+
+# Compilar todo el proyecto
 ./gradlew clean build
+
 ```
 
 ### 5. Ejecutar la Aplicación
